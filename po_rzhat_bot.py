@@ -79,7 +79,7 @@ def echo(update, context):
         if (update.message.photo):
             fileID = update.message.photo[-1].file_id
             strings.append(fileID)
-            message = "Фотография принята. Теперь напишите теги, по котормы можно будет найти фотографию (например, 'курс денег упал, деньги, перспектива') 🤓"
+            message = "Фотография принята. Теперь напишите теги, по которым можно будет найти фотографию (например, 'курс денег упал, деньги, перспектива') 🤓"
             update.message.reply_text(message, reply_markup = keyboardGen())
             position = 2
         else:
@@ -92,9 +92,13 @@ def echo(update, context):
         addStringLine(id, update.message.text, strings[0])
         admins = getAdminList()
         for i in range(0, len(admins)):
-            textMessage = "{}: добавлена новая картинка по тегам: {}".format(id,update.message.text)
-            catBot.send_message(chat_id = int(admins[i]), text = textMessage)
-            catBot.send_photo(chat_id = int(admins[i]), photo = strings[0])
+            try:
+                textMessage = "{}: добавлена новая картинка по тегам: {}".format(id,update.message.text)
+                catBot.send_message(chat_id = int(admins[i]), text = textMessage)
+                catBot.send_photo(chat_id = int(admins[i]), photo = strings[0])
+            except:
+                deleteAdmin(admins[i])
+                
         
         isEditing = False
         del positions[index]
@@ -131,10 +135,12 @@ def echo(update, context):
         index = editingIDs.index(id)
         positions[index] = position
         stringsToRemember[index] = strings
+    
 
 def error (update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
     update.message.reply_text("Произошла ошибка, сообщите об этом разработчику (контакт есть в информации о боте)")
+
 
 def main():
     updater = Updater(token, use_context=True)
@@ -143,5 +149,6 @@ def main():
     dp.add_error_handler(error)
     updater.start_polling()
     updater.idle()
+
 
 main()
